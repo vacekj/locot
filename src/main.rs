@@ -1,4 +1,4 @@
-use git2::{ObjectType, Repository};
+use git2::Repository;
 use plotters::prelude::*;
 use std::collections::HashMap;
 use std::path::Path;
