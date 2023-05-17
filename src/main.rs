@@ -1,12 +1,22 @@
-use git2::Repository;
+use fs_extra::dir::{copy, CopyOptions};
+use git2::{ObjectType, Repository};
 use plotters::prelude::*;
 use std::collections::HashMap;
 use std::path::Path;
+use tempfile::tempdir;
 use tokei::{Config, Languages};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let dir = tempdir()?;
+
+    // Copy the repository to the temporary directory
     let repo_path = Path::new(".");
-    let repo = Repository::open(repo_path)?;
+    let temp_repo_path = dir.path();
+    let mut options = CopyOptions::new(); // Initializes the copy options
+    options.overwrite = true; // Overwrite existing files in destination
+    copy(repo_path, temp_repo_path, &options)?;
+
+    let repo = Repository::open(temp_repo_path)?;
 
     let mut revwalk = repo.revwalk()?;
     revwalk.set_sorting(git2::Sort::TIME)?;
