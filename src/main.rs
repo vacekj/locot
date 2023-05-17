@@ -32,9 +32,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Reset repository to head after analysis.
-    let head = repo.head()?.target().unwrap();
-    let head_commit = repo.find_commit(head)?;
     let max_loc = data
         .values()
         .map(|v| *v.iter().max().unwrap_or(&0))
