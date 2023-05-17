@@ -1,8 +1,8 @@
-use git2::{Repository, ObjectType};
-use tokei::{Languages, Config};
+use git2::{ObjectType, Repository};
 use plotters::prelude::*;
 use std::collections::HashMap;
 use std::path::Path;
+use tokei::{Config, Languages};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let repo_path = Path::new(".");
@@ -35,7 +35,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Reset repository to head after analysis.
     let head = repo.head()?.target().unwrap();
     let head_commit = repo.find_commit(head)?;
-    repo.checkout_tree(&head_commit.tree()?.into_object(), None)?;
+    let max_loc = data
+        .values()
+        .map(|v| *v.iter().max().unwrap_or(&0))
+        .max()
+        .unwrap_or(0);
 
     // Drawing
     let root = BitMapBackend::new("lines_of_code.png", (800, 600)).into_drawing_area();
@@ -43,14 +47,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .caption("Lines of Code Over Time", ("Arial", 50).into_font())
-        .build_cartesian_2d(0..data.values().map(|v| v.len()).max().unwrap() as i32, 0..100_000)?;
+        .build_cartesian_2d(
+            0..data.values().map(|v| v.len()).max().unwrap() as i32,
+            0..(2 * max_loc) as i32,
+        )?;
 
     chart.configure_mesh().draw()?;
 
     for (lang, counts) in &data {
         chart
             .draw_series(LineSeries::new(
-                counts.iter().enumerate().map(|(i, y)| (i as i32, *y as i32)),
+                counts
+                    .iter()
+                    .enumerate()
+                    .map(|(i, y)| (i as i32, *y as i32)),
                 &RED,
             ))?
             .label(lang)
