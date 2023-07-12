@@ -1,8 +1,8 @@
-use git2::{Commit, Oid, Repository};
+use git2::Repository;
 use std::collections::HashMap;
-use std::{env, fs};
+use std::env;
 use tempfile::tempdir;
-use tokei::{CodeStats, Config, Language, Languages};
+use tokei::{Config, Languages};
 
 fn main() {
     let tmp_dir = tempdir().expect("Temporary directory to be created");
