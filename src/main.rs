@@ -1,10 +1,18 @@
+use anyhow::Error;
 use git2::Repository;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::env;
+use std::{env, io};
 use tempfile::tempdir;
 use tokei::{Config, Languages};
 
-fn main() {
+#[derive(Debug, Serialize, Deserialize)]
+struct Stat {
+    commit: String,
+    total: usize,
+}
+
+fn main() -> Result<(), Error> {
     let tmp_dir = tempdir().expect("Temporary directory to be created");
 
     let repo = Repository::clone_recurse(
@@ -17,7 +25,7 @@ fn main() {
     .expect("Checking out repo not to fail");
 
     let mut revwalk = repo.revwalk().expect("Creating revwalk not to fail");
-    revwalk.push_head().unwrap();
+    revwalk.push_head()?;
 
     let mut stats: HashMap<String, Languages> = HashMap::new();
 
@@ -25,7 +33,7 @@ fn main() {
         let commit_hash = oid.clone().to_string();
         let commit = repo.find_commit(oid).unwrap();
 
-        let branch = repo.branch(&commit_hash, &commit, false);
+        let _ = repo.branch(&commit_hash, &commit, false);
 
         let obj = repo
             .revparse_single(&("refs/heads/".to_owned() + &commit_hash))
@@ -37,20 +45,24 @@ fn main() {
         repo.set_head(&("refs/heads/".to_owned() + &commit_hash))
             .expect("setting head not to fail");
 
-        let commit = repo.find_commit(oid).unwrap();
-
-        println!("Checking commit {}", commit.id());
-
         repo.set_head_detached(commit.id()).unwrap();
 
         let mut langs = Languages::new();
         langs.get_statistics(&[&tmp_dir], &[".git", "target"], &Config::default());
-        dbg!(&langs.total());
+
         stats.insert(commit_hash, langs);
     }
 
-    let final_stats = stats
-        .iter()
-        .map(|lang| (lang.0, lang.1.total().code))
-        .collect::<Vec<(&String, usize)>>();
+    let mut wtr = csv::Writer::from_writer(io::stdout());
+
+    for (commit, stat) in stats {
+        wtr.serialize(Stat {
+            commit,
+            total: stat.total().code,
+        })?;
+    }
+
+    wtr.flush()?;
+
+    Ok(())
 }
