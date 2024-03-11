@@ -1,4 +1,5 @@
 use anyhow::Error;
+use chrono::{Date, DateTime, Local, TimeZone};
 use git2::Repository;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -10,6 +11,7 @@ use tokei::{Config, Languages};
 struct Stat {
     commit: String,
     total: usize,
+    langs: Vec<usize>,
 }
 
 fn main() -> Result<(), Error> {
@@ -28,6 +30,12 @@ fn main() -> Result<(), Error> {
     revwalk.push_head()?;
 
     let mut stats: HashMap<String, Languages> = HashMap::new();
+
+    /*TODO:
+    1. get the element with the most languages (track all languages from the beginning)
+    2. write the languages as headers
+     3. transform the languages in the btreemap to a hashmap, fill in the missing ones as 0, sort by name, and then convert to vec of tuples
+      4. serialize into the Stat struct, keeping the sorting */
 
     for oid in revwalk.flatten() {
         let commit_hash = oid.clone().to_string();
@@ -49,16 +57,23 @@ fn main() -> Result<(), Error> {
 
         let mut langs = Languages::new();
         langs.get_statistics(&[&tmp_dir], &[".git", "target"], &Config::default());
-
+        let time = DateTime::from_timestamp(commit.time().seconds(), 0)
+            .expect("Creating time from commit not to fail");
         stats.insert(commit_hash, langs);
     }
 
-    let mut wtr = csv::Writer::from_writer(io::stdout());
+    let mut wtr = csv::WriterBuilder::new()
+        .has_headers(false)
+        .from_writer(io::stdout());
 
     for (commit, stat) in stats {
         wtr.serialize(Stat {
             commit,
             total: stat.total().code,
+            langs: stat
+                .iter()
+                .map(|(typ, lang)| lang.reports.last().unwrap().stats.code)
+                .collect(),
         })?;
     }
 
