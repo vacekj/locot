@@ -2,7 +2,7 @@
 
 A simple utility to get Lines Of Code Over Time for a git repository. Outputs CSV for visualization and analysis
 
-[Example graph](https://docs.google.com/spreadsheets/d/1bj1AycRde3_HdCb47NGE71NRtrY3rkjZIWzUoTAO0GA)
+[Example graph of the Noir repo](https://docs.google.com/spreadsheets/d/1Zx_O20KeL6PlNVs9AYsVBMJqX0vWL0g9I2fP_azxTSk/edit)
 
 ## Install
 
