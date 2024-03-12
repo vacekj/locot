@@ -2,7 +2,7 @@
 name = "locot"
 version = "0.1.1"
 edition = "2021"
-license = "GPL-3"
+license = "GPL-3.0-or-later"
 homepage = "https://github.com/vacekj/locot"
 repository = "https://github.com/vacekj/locot"
 documentation = "https://docs.rs/locot"
