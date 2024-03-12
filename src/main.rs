@@ -123,8 +123,8 @@ fn main() -> Result<(), Error> {
                 .map(|language_type| {
                     let found_lang = stat
                         .iter()
-                        .find(|(typ, lang)| typ.eq(&language_type))
-                        .map(|(typ, lang)| lang.clone());
+                        .find(|(typ, _)| typ.eq(&language_type))
+                        .map(|(_, lang)| lang.clone());
                     if let Some(mut lang) = found_lang {
                         lang.total();
                         lang.lines()
