@@ -11,8 +11,7 @@ description = "A simple utility to get Lines Of Code Over Time for a git reposit
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokei = "*"
-plotters = "*"
+tokei = "12.1.2"
 git2 = "0.17.1"
 tempfile = "3.5.0"
 anyhow = "1.0.71"
