@@ -2,6 +2,11 @@
 name = "locot"
 version = "0.1.0"
 edition = "2021"
+license = "GPL-3"
+homepage = "https://github.com/vacekj/locot"
+repository = "https://github.com/vacekj/locot"
+documentation = "https://docs.rs/locot"
+description = "A simple utility to get Lines Of Code Over Time for a git repository. Outputs CSV for visualization and analysis"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
