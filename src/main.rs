@@ -1,13 +1,32 @@
 use anyhow::Error;
-use chrono::{Date, DateTime, Local, TimeZone, Utc};
-use git2::{Repository, Time};
+use chrono::{DateTime, Utc};
+use clap::{Parser, ValueEnum};
+use git2::Repository;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::os::macos::raw::stat;
-use std::{env, io};
+use std::io;
 use tempfile::tempdir;
 use tokei::{Config, LanguageType, Languages};
+
+#[derive(ValueEnum, Clone, Debug, Copy)]
+#[clap(rename_all = "kebab_case")]
+enum OutputFormat {
+    Csv,
+}
+
+/// Counts Lines Of COde over Time
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Repository path
+    #[arg(short, long, default_value = ".")]
+    path: String,
+
+    /// Output format
+    #[arg(short, long, default_value = "csv", value_enum)]
+    format: OutputFormat,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Stat {
@@ -18,16 +37,12 @@ struct Stat {
 }
 
 fn main() -> Result<(), Error> {
+    let args = Args::parse();
+
     let tmp_dir = tempdir().expect("Temporary directory to be created");
 
-    let repo = Repository::clone_recurse(
-        env::current_dir()
-            .expect("Getting current directory not to fail")
-            .to_str()
-            .expect("Converting current directory to string not to fail"),
-        tmp_dir.path(),
-    )
-    .expect("Checking out repo not to fail");
+    let repo = Repository::clone_recurse(&args.path, tmp_dir.path())
+        .expect("Checking out repo not to fail");
 
     let mut revwalk = repo.revwalk().expect("Creating revwalk not to fail");
     revwalk.push_head()?;
