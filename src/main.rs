@@ -15,7 +15,7 @@ enum OutputFormat {
     Csv,
 }
 
-/// Counts Lines Of COde over Time
+/// Counts Lines Of Code Over Time
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
@@ -117,7 +117,7 @@ fn main() -> Result<(), Error> {
         wtr.serialize(Stat {
             commit: commit.0.clone(),
             date: commit.1,
-            total: stat.total().code,
+            total: stat.total().lines(),
             langs: all_langs
                 .iter_mut()
                 .map(|language_type| {
