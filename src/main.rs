@@ -108,7 +108,7 @@ fn main() -> Result<(), Error> {
     wtr.serialize(Header {
         commit: "Commit".into(),
         time: "Time".into(),
-        total: "Total (code)".into(),
+        total: "Total".into(),
         langs: all_langs.iter().map(|t| t.to_string()).collect(),
     })
     .expect("Writing header not to fail");
